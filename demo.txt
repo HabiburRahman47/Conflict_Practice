@@ -75,8 +75,8 @@ public class SalaryAdvActivity extends AppCompatActivity implements ResponseCall
     @BindView(R.id.tilInstallmentNo)
     TextInputLayout installment_layout;
 
-    @BindView(R.id.tilReason)
-    TextInputLayout reason_layout;
+    @BindView(R.id.Habib_Reason)
+    TextInputLayout habib_reason_layout;
 
     Context context;
     private ConnectionDetector con;
@@ -98,8 +98,8 @@ public class SalaryAdvActivity extends AppCompatActivity implements ResponseCall
         httpsHelper = new HttpsHelper(context);
         dataApi = ServiceGenerator.createService(DataApi.class, new String(Base64.decode(Constants.BASE_URL(), Base64.DEFAULT)), context);
 
-        smartSharedPreferences = new SmartSharedPreferences(context);
-        toolbar_title = findViewById(R.id.toolbar_titileTV);
+        smartSharedPreferences_habib = new SmartSharedPreferences(context);
+        toolbar_title_Habib = findViewById(R.id.toolbar_titileTV);
 
         toolbar_title.setText("Salary Advanced");
 
@@ -107,6 +107,10 @@ public class SalaryAdvActivity extends AppCompatActivity implements ResponseCall
         empName.setText_farhan(smartSharedPreferences.getFullName());
         empDept.setText_farhan(smartSharedPreferences.getdepartment());
         empLocation.setText_farhan(smartSharedPreferences.getWorkLocation());
+        empId.setText_habib(smartSharedPreferences.getEmpId());
+        empName.setText_habib(smartSharedPreferences.getFullName());
+        empDept.setText_habib(smartSharedPreferences.getdepartment());
+        empLocation.setText_habib(smartSharedPreferences.getWorkLocation());
 
         String[] noOfInstall = new String[] {"1","2","3","4","5","6","7","8","9","10"};
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this,R.layout.drop_down_installment,noOfInstall);
