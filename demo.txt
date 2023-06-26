@@ -1,0 +1,223 @@
+package com.sevenringscement.smart.android.activities.selfService;
+
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+
+import android.content.Context;
+import android.content.DialogInterface;
+import android.os.Bundle;
+import android.util.Base64;
+import android.util.Log;
+import android.view.View;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import com.google.android.material.textfield.TextInputLayout;
+import com.sevenringscement.smart.android.Adapter.PaySlipAdapter;
+import com.sevenringscement.smart.android.DataRequests.HttpsHelper;
+import com.sevenringscement.smart.android.DataRequests.ResponseCallback;
+import com.sevenringscement.smart.android.Model.SelfService.SalaryAdvPFMain;
+import com.sevenringscement.smart.android.R;
+import com.sevenringscement.smart.android.RetrofitConfig.DataApi;
+import com.sevenringscement.smart.android.RetrofitConfig.ServiceGenerator;
+import com.sevenringscement.smart.android.utilities.ConnectionDetector;
+import com.sevenringscement.smart.android.utilities.Constants;
+import com.sevenringscement.smart.android.utilities.SmartSharedPreferences;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import retrofit2.Call;
+
+public class SalaryAdvActivity extends AppCompatActivity implements ResponseCallback{
+
+    private TextView toolbar_title;
+
+    @BindView(R.id.tietEmpId)
+    EditText empId;
+
+    @BindView(R.id.tietEmpName)
+    EditText empName;
+
+    @BindView(R.id.tietEmpDept)
+    EditText empDept;
+
+    @BindView(R.id.tietLocation)
+    EditText empLocation;
+
+    @BindView(R.id.tietEligibility)
+    EditText eligibilityStatus;
+
+    @BindView(R.id.tietEligibilityAmt)
+    EditText eligibilityAmt;
+
+    @BindView(R.id.tietAppliedAmt)
+    EditText appliedAmt;
+
+    @BindView(R.id.noOfInstall)
+    AutoCompleteTextView noOfInstallment;
+
+    @BindView(R.id.tietReason)
+    EditText reason;
+
+    @BindView(R.id.btnSubmit)
+    Button btnSubmit;
+
+    @BindView(R.id.tilAmount)
+    TextInputLayout amount_layout;
+
+    @BindView(R.id.tilInstallmentNo)
+    TextInputLayout installment_layout;
+
+    @BindView(R.id.tilReason)
+    TextInputLayout reason_layout;
+
+    Context context;
+    private ConnectionDetector con;
+    HttpsHelper httpsHelper;
+    SmartSharedPreferences smartSharedPreferences;
+    PaySlipAdapter paySlipAdapter;
+    DataApi dataApi;
+
+    Call<SalaryAdvPFMain> salaryAdvMainCall;
+
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_salary_adv);
+        this.context = this;
+        ButterKnife.bind(this);
+        con = new ConnectionDetector(context);
+        httpsHelper = new HttpsHelper(context);
+        dataApi = ServiceGenerator.createService(DataApi.class, new String(Base64.decode(Constants.BASE_URL(), Base64.DEFAULT)), context);
+
+        smartSharedPreferences = new SmartSharedPreferences(context);
+        toolbar_title = findViewById(R.id.toolbar_titileTV);
+
+        toolbar_title.setText("Salary Advanced");
+
+        empId.setText(smartSharedPreferences.getEmpId());
+        empName.setText(smartSharedPreferences.getFullName());
+        empDept.setText(smartSharedPreferences.getdepartment());
+        empLocation.setText(smartSharedPreferences.getWorkLocation());
+
+        String[] noOfInstall = new String[] {"1","2","3","4","5","6","7","8","9","10"};
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this,R.layout.drop_down_installment,noOfInstall);
+        AutoCompleteTextView autoCompleteTextView = findViewById(R.id.noOfInstall);
+        autoCompleteTextView.setDropDownVerticalOffset(autoCompleteTextView.getHeight());
+        autoCompleteTextView.setAdapter(adapter);
+
+        btnSubmit.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                if (!validateAmount() | !validateInstallmentNo() | !validateReason()){
+                    return;
+                }
+
+                JSONObject fields = new JSONObject();
+                try {
+                    fields.put("REPORT_HEADER_ID","01637078894");
+                    fields.put("EMPLOYEE_ID",smartSharedPreferences.getEmpId());
+                    fields.put("EMPLOYEE_NAME",smartSharedPreferences.getFullName());
+                    fields.put("DEPARTMENT_NAME",smartSharedPreferences.getdepartment());
+                    fields.put("LOCATION",smartSharedPreferences.getWorkLocation());
+                    fields.put("ELIGIBILITY_STATUS",eligibilityStatus.getText());
+                    fields.put("ELIGIBILITY_AMOUNT",eligibilityAmt.getText());
+                    fields.put("APPLIED_AMOUNT",appliedAmt.getText());
+                    fields.put("NO_INSTALLMENT",noOfInstallment.getText());
+                    fields.put("REASON",reason.getText());
+                    fields.put("STATUS_FLG","initiated");
+                    fields.put("ORG_ID",smartSharedPreferences.getOrgId());
+                    fields.put("ORG_NAME",smartSharedPreferences.getOrgName());
+                    fields.put("APPLICATION_TYPE","salary advanced loan");
+
+                    String final_value = fields.toString();
+                    Log.d("final_value",final_value);
+                    salaryAdvMainCall = dataApi.createSalaryAdv(smartSharedPreferences.getUserId(), smartSharedPreferences.getAuthCode(), smartSharedPreferences.getDeviceId(), smartSharedPreferences.getPushId(),final_value);
+                    httpsHelper.getSalaryAdvPF(salaryAdvMainCall,SalaryAdvActivity.this);
+
+                } catch (JSONException e) {
+                    throw new RuntimeException(e);
+                }
+
+
+//                Toast.makeText((Context) SalaryAdvActivity.this,fields,Toast.LENGTH_SHORT).show();
+
+
+            }
+        });
+
+    }
+
+//    @Override
+//    public void onSuccess(Object data, int service_code) {
+//        Toast.makeText(SalaryAdvActivity.this,"Successfully Done",Toast.LENGTH_SHORT).show();
+//    }
+
+    @Override
+    public void onSuccess(Object data, int service_code) {
+        // Show confirmation dialog
+        new AlertDialog.Builder(SalaryAdvActivity.this)
+                .setTitle("Success!")
+                .setMessage("Salary advance request submitted successfully.")
+                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        // User clicked OK, so dismiss the dialog
+                        dialog.dismiss();
+                    }
+                })
+                .setIcon(android.R.drawable.ic_dialog_alert)
+                .show();
+    }
+
+    @Override
+    public void onError(Throwable th) {
+
+    }
+
+    public boolean validateAmount(){
+        String amount_val = amount_layout.getEditText().getText().toString();
+        if (amount_val.isEmpty()){
+            amount_layout.setError("Field can not be empty.");
+            return false;
+        }else {
+            amount_layout.setError(null);
+            amount_layout.setErrorEnabled(false);
+            return true;
+        }
+    }
+
+    public boolean validateInstallmentNo(){
+        String amount_val = installment_layout.getEditText().getText().toString();
+        if (amount_val.isEmpty()){
+            installment_layout.setError("Field can not be empty.");
+            return false;
+        }else {
+            installment_layout.setError(null);
+            installment_layout.setErrorEnabled(false);
+            return true;
+        }
+    }
+
+    public boolean validateReason(){
+        String amount_val = reason_layout.getEditText().getText().toString();
+        if (amount_val.isEmpty()){
+            reason_layout.setError("Field can not be empty.");
+            return false;
+        }else {
+            reason_layout.setError(null);
+            reason_layout.setErrorEnabled(false);
+            return true;
+        }
+    }
+
+
+}
