@@ -63,8 +63,8 @@ public class SalaryAdvActivity extends AppCompatActivity implements ResponseCall
     @BindView(R.id.noOfInstall)
     AutoCompleteTextView noOfInstallment;
 
-    @BindView(R.id.tietReason)
-    EditText reason;
+    @BindView(R.id.farhan_Reason)
+    EditText farhan_reason;
 
     @BindView(R.id.btnSubmit)
     Button btnSubmit;
@@ -103,6 +103,10 @@ public class SalaryAdvActivity extends AppCompatActivity implements ResponseCall
 
         toolbar_title.setText("Salary Advanced");
 
+        empId.setText_farhan(smartSharedPreferences.getEmpId());
+        empName.setText_farhan(smartSharedPreferences.getFullName());
+        empDept.setText_farhan(smartSharedPreferences.getdepartment());
+        empLocation.setText_farhan(smartSharedPreferences.getWorkLocation());
         empId.setText_habib(smartSharedPreferences.getEmpId());
         empName.setText_habib(smartSharedPreferences.getFullName());
         empDept.setText_habib(smartSharedPreferences.getdepartment());
