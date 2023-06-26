@@ -63,8 +63,8 @@ public class SalaryAdvActivity extends AppCompatActivity implements ResponseCall
     @BindView(R.id.noOfInstall)
     AutoCompleteTextView noOfInstallment;
 
-    @BindView(R.id.tietReason)
-    EditText reason;
+    @BindView(R.id.farhan_Reason)
+    EditText farhan_reason;
 
     @BindView(R.id.btnSubmit)
     Button btnSubmit;
@@ -103,10 +103,10 @@ public class SalaryAdvActivity extends AppCompatActivity implements ResponseCall
 
         toolbar_title.setText("Salary Advanced");
 
-        empId.setText(smartSharedPreferences.getEmpId());
-        empName.setText(smartSharedPreferences.getFullName());
-        empDept.setText(smartSharedPreferences.getdepartment());
-        empLocation.setText(smartSharedPreferences.getWorkLocation());
+        empId.setText_farhan(smartSharedPreferences.getEmpId());
+        empName.setText_farhan(smartSharedPreferences.getFullName());
+        empDept.setText_farhan(smartSharedPreferences.getdepartment());
+        empLocation.setText_farhan(smartSharedPreferences.getWorkLocation());
 
         String[] noOfInstall = new String[] {"1","2","3","4","5","6","7","8","9","10"};
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this,R.layout.drop_down_installment,noOfInstall);
